@@ -16,7 +16,7 @@
 
 - 每次只训练一个 Transformer 层
 - 其他层全部冻结，节省显存
-- 使用 FP32 精度
+- 使用 BF16 精度
 - 支持恢复与逐阶段检查
 
 建议训练所有 24 层，每层输出会保存在 `./checkpoints/layer_XX/` 中。
@@ -39,7 +39,7 @@ This project allows to train models layer by layer with very limited video memor
 
 - Train only one Transformer layer at a time
 - Freeze all other layers to save memory
-- Use FP32 precision
+- Use BF6 precision
 - Supports recovery and stage-by-stage checking
 
 It is recommended to train all 24 layers, and the output of each layer is saved in `. /checkpoints/layer_XX/`.
