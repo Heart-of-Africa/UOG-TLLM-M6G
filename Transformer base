@@ -1,0 +1,71 @@
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader
+
+from transformer_model import Transformer  # 假设你已有Transformer模块
+from dataset import TranslationDataset    # 自定义数据集
+from tokenizer import BPE_Tokenizer       # BPE分词器
+
+# === 参数设置 ===
+BATCH_SIZE = 64
+WARMUP_STEPS = 4000
+MAX_STEPS = 100_000
+D_MODEL = 512
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# === 数据加载（你需要自定义或使用标准数据）===
+train_dataset = TranslationDataset("train.en", "train.de", tokenizer=BPE_Tokenizer())
+train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=train_dataset.collate_fn)
+
+# === 模型初始化 ===
+model = Transformer(d_model=D_MODEL, ...)
+model.to(DEVICE)
+
+# === 优化器 ===
+optimizer = optim.Adam(model.parameters(), betas=(0.9, 0.98), eps=1e-9)
+
+# === 学习率调度器 ===
+class TransformerLRScheduler:
+    def __init__(self, optimizer, d_model, warmup_steps=4000):
+        self.optimizer = optimizer
+        self.d_model = d_model
+        self.warmup_steps = warmup_steps
+        self.step_num = 0
+
+    def step(self):
+        self.step_num += 1
+        lr = self.compute_lr()
+        for param_group in self.optimizer.param_groups:
+            param_group["lr"] = lr
+
+    def compute_lr(self):
+        arg1 = self.step_num ** -0.5
+        arg2 = self.step_num * (self.warmup_steps ** -1.5)
+        return (self.d_model ** -0.5) * min(arg1, arg2)
+
+lr_scheduler = TransformerLRScheduler(optimizer, d_model=D_MODEL, warmup_steps=WARMUP_STEPS)
+
+# === 损失函数 ===
+criterion = nn.CrossEntropyLoss(ignore_index=0)  # 0为padding
+
+# === 训练循环 ===
+step = 0
+model.train()
+while step < MAX_STEPS:
+    for src, tgt_in, tgt_out in train_loader:
+        src, tgt_in, tgt_out = src.to(DEVICE), tgt_in.to(DEVICE), tgt_out.to(DEVICE)
+
+        optimizer.zero_grad()
+        output = model(src, tgt_in)  # [B, T, Vocab]
+        loss = criterion(output.view(-1, output.shape[-1]), tgt_out.view(-1))
+        loss.backward()
+        optimizer.step()
+        lr_scheduler.step()
+
+        step += 1
+        if step % 100 == 0:
+            print(f"Step {step}, Loss: {loss.item():.4f}")
+
+        if step >= MAX_STEPS:
+            break
