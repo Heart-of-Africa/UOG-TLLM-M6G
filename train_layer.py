@@ -1,14 +1,9 @@
 import argparse
 import torch
-from transformers import GPT2Tokenizer, Trainer, TrainingArguments, TextDataset, DataCollatorForLanguageModeling
+from transformers import GPT2Tokenizer, Trainer, TrainingArguments, DataCollatorForLanguageModeling
 from model import build_model
-import sys, os
-sys.path.append(os.path.dirname(__file__))
-from datasets import load_dataset
-
-dataset = load_dataset('text', data_files='train.txt')
-
 from freeze_utils import freeze_all_layers_except
+from datasets import load_dataset
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--layer", type=int, required=True)
@@ -18,14 +13,17 @@ layer_id = args.layer
 tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 tokenizer.pad_token = tokenizer.eos_token
 
-def load_dataset(path, tokenizer, block_size=1024):
-    return TextDataset(tokenizer=tokenizer, file_path=path, block_size=block_size)
+# 使用 datasets 替代 TextDataset
+raw_dataset = load_dataset("text", data_files={"train": "train.txt"})
+def tokenize_function(example):
+    return tokenizer(example["text"], truncation=True, padding="max_length", max_length=1024)
+tokenized_dataset = raw_dataset["train"].map(tokenize_function, batched=True)
+train_dataset = tokenized_dataset
 
 model = build_model()
 freeze_all_layers_except(model, layer_id)
 model.to(dtype=torch.float32, device="cuda")
 
-dataset = load_dataset("train.txt", tokenizer)
 data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
 training_args = TrainingArguments(
@@ -36,6 +34,7 @@ training_args = TrainingArguments(
     learning_rate=2e-4,
     save_total_limit=1,
     save_steps=100,
+    bf16=True,
     logging_steps=10,
     logging_dir="./logs",
     report_to="none"
@@ -44,7 +43,7 @@ training_args = TrainingArguments(
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataset=dataset,
+    train_dataset=train_dataset,
     tokenizer=tokenizer,
     data_collator=data_collator
 )
