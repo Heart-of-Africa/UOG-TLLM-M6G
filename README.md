@@ -20,3 +20,26 @@
 - 支持恢复与逐阶段检查
 
 建议训练所有 24 层，每层输出会保存在 `./checkpoints/layer_XX/` 中。
+
+# LLM FP32 Layer-by-Layer Training Program (for 6GB video memory)
+
+This project allows to train models layer by layer with very limited video memory (minimum 6GB).
+
+## Usage
+
+1. Install the dependencies: 
+ pip install -r requirements.txt
+
+2. Train layer i (e.g. layer 5): 
+ python train_layer.py --layer 5
+
+3. After all layers are trained, merge the weights in merge_checkpoints.py.
+
+## Technical Strategy
+
+- Train only one Transformer layer at a time
+- Freeze all other layers to save memory
+- Use FP32 precision
+- Supports recovery and stage-by-stage checking
+
+It is recommended to train all 24 layers, and the output of each layer is saved in `. /checkpoints/layer_XX/`.
