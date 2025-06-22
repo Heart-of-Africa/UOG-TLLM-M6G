@@ -47,6 +47,12 @@ trainer = Trainer(
     tokenizer=tokenizer,
     data_collator=data_collator
 )
+outputs = trainer.train()
+if hasattr(outputs, "training_loss") and outputs.training_loss < 0.7:
+        trainer.save_model(f"./checkpoints/layer_{layer_id:02d}_earlystop")
+        print("📦 提前保存：loss < 0.7")
 
+trainer.save_model(f"./checkpoints/layer_{layer_id:02d}")
+print(f"✅ 模型保存完成")
 trainer.train()
 trainer.save_model(f"./checkpoints/layer_{layer_id:02d}")
