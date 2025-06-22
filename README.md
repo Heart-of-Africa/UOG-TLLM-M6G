@@ -10,7 +10,10 @@
 2. 训练第 i 层（例如第 5 层）：
     python train_layer.py --layer 5
 
-3. 所有层训练完后，可在 merge_checkpoints.py 中合并权重。
+3. 训练完 i 层，即可尝试部署 i 层
+    python infer_layer0.py
+
+5. 所有层训练完后，可在 merge_checkpoints.py 中合并权重。
 
 ## 技术策略
 
