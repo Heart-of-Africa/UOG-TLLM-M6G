@@ -1,7 +1,7 @@
 This project is licensed for personal, non-commercial use only.
 Any redistribution or commercial usage is strictly prohibited.
 
-# OVERTURE FP16 分层训练项目（适配 6GB 显存）
+# OVERTURE BP16 分层训练项目（适配 6GB 显存）
 
 该项目允许在显存非常有限的情况下（最低6GB）逐层训练模型。
 
@@ -45,7 +45,7 @@ This project allows to train models layer by layer with very limited video memor
 
 - Train only one Transformer layer at a time
 - Freeze all other layers to save memory
-- Use BF6 precision
+- Use BF16 precision
 - Supports recovery and stage-by-stage checking
 
 It is recommended to train all 24 layers, and the output of each layer is saved in `. /checkpoints/layer_XX/`.
