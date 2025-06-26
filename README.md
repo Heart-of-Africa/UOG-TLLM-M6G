@@ -1,7 +1,7 @@
 This project is licensed for personal, non-commercial use only.
 Any redistribution or commercial usage is strictly prohibited.
 
-# OVERTURE BP16 分层训练项目（适配 6GB 显存）
+# OVERTURE BF16 分层训练项目（适配 6GB 显存）
 
 该项目允许在显存非常有限的情况下（最低6GB）逐层训练模型。
 
