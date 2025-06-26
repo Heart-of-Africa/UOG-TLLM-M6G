@@ -27,7 +27,7 @@ Any redistribution or commercial usage is strictly prohibited.
 
 建议训练所有 24 层，每层输出会保存在 `./checkpoints/layer_XX/` 中。
 
-# LLM FP32 Layer-by-Layer Training Program (for 6GB video memory)
+# LLM BF16 Layer-by-Layer Training Program (for 6GB video memory)
 
 This project allows to train models layer by layer with very limited video memory (minimum 6GB).
 
